@@ -23,7 +23,7 @@ common.plugin = plugin + ' ' + __version__
 
 from addonfunc import addListItem, playListItem, getUrl, getPage, setViewMode, getParameters, retry
 
-@retry(IndexError)
+#@retry(IndexError)
 def build_main_directory():
 	main=[
 		( settings.getLocalizedString( 30000 ), tvshows_thumb, 'menu2949050', '1' ),
@@ -42,11 +42,11 @@ def build_main_directory():
 	build_video_directory('http://espn.go.com/video/format/libraryPlaylist?categoryid=2378529', 'The Latest', 'null')
 	setViewMode("503")
 
-@retry(IndexError)
+#@retry(IndexError)
 def build_sub_directory(url, thumb):
 	saveurl = url
 	html = getUrl('http://espn.go.com/video/')
-	html = html.decode(encoding='UTF-16',errors='ignore') #Swedemon fix 2015-02-16
+	html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-02-16
 	menu = common.parseDOM(html, "div", attrs = { "id": url })
 	channel = common.parseDOM(menu, "li", attrs = { "class": "channel" })
 	title = common.parseDOM(channel, "a")
@@ -111,7 +111,7 @@ def build_sub_directory(url, thumb):
 	setViewMode("503")
 	xbmcplugin.endOfDirectory( int( sys.argv[1] ) )
 
-@retry(IndexError)
+#@retry(IndexError)
 def build_video_directory(url, name, type):
 	nextname = name
 	if name == settings.getLocalizedString( 30005 ):
@@ -134,6 +134,7 @@ def build_video_directory(url, name, type):
 		url = 'http://search.espn.go.com/results?searchString=' + newStr + '&start=' + str(int(page) * 16) + '&dims=6'
 		nexturl = url
 		html = getUrl(url).decode('ascii', 'ignore')
+		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
 		results = common.parseDOM(html, "li", attrs = { "class": "result video-result" })
 		titledata = common.parseDOM(results, "h3")
 		title = common.parseDOM(titledata, "a", attrs = { "rel": "nofollow" })
@@ -152,12 +153,17 @@ def build_video_directory(url, name, type):
 	else:
 		nexturl = url
 		html = getUrl(url + "&pageNum=" + str(int(page)) + "&sortBy=&assetURL=http://assets.espn.go.com&module=LibraryPlaylist&pagename=vhub_index")
+		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
 		videocell = common.parseDOM(html, "div", attrs = { "class": "video-cell" })
 		title = common.parseDOM(videocell, "h5")
 		thumb = common.parseDOM(videocell, "img", ret = "src")
 		desc = common.parseDOM(common.parseDOM(videocell, "p", attrs = { "class": "watch-now" }), "a", ret = "href")
-		pagecount = common.parseDOM(html, "div", attrs = { "class": "page-numbers" })[0].rsplit(' of ')
+		try:
+			pagecount = common.parseDOM(html, "div", attrs = { "class": "page-numbers" })[0].rsplit(' of ')
+		except:
+			pagecount = ''
 	item_count = 0
+	#print 'videocell='+str(videocell)+'title='+str(title)+'thumb='+str(thumb)+'desc='+str(desc)+'pagecount='+str(pagecount)
 	for name in title:
 		if '/espn360/' not in thumb[item_count]:
 			if 'http://' in desc[item_count]:
@@ -178,7 +184,7 @@ def build_video_directory(url, name, type):
 			infoLabels = { "Title": name, "Plot": plot }
 			addListItem(label = name, image = thumbnailImage, url = u, isFolder = False, infoLabels = infoLabels)
 		item_count += 1
-	if pagecount[0] != pagecount[1]:
+	if pagecount and pagecount[0] != pagecount[1]:
 		u = { 'mode': '2', 'name': nextname, 'url': nexturl, 'page': str(int(page) + 1), 'type': 'null' }
 		infoLabels = { "Title": settings.getLocalizedString( 30003 ), "Plot": settings.getLocalizedString( 30003 ) }
 		addListItem(label = settings.getLocalizedString( 30003 ), image = next_thumb, url = u, isFolder = True, infoLabels = infoLabels)
@@ -298,6 +304,9 @@ try:
 	type = urllib.unquote_plus(params["type"])
 except:
 	pass
+
+common.dbg = True # Default
+common.dbglevel = 3 # Default
 
 try:
 	if mode == None:
