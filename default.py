@@ -153,7 +153,7 @@ def build_video_directory(url, name, type):
 	else:
 		nexturl = url
 		html = getUrl(url + "&pageNum=" + str(int(page)) + "&sortBy=&assetURL=http://assets.espn.go.com&module=LibraryPlaylist&pagename=vhub_index")
-		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
+		html = html.decode() #mrdally204 FireTv Change 2015-08-19
 		videocell = common.parseDOM(html, "div", attrs = { "class": "video-cell" })
 		title = common.parseDOM(videocell, "h5")
 		thumb = common.parseDOM(videocell, "img", ret = "src")
