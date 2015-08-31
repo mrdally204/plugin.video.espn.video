@@ -46,7 +46,7 @@ def build_main_directory():
 def build_sub_directory(url, thumb):
 	saveurl = url
 	html = getUrl('http://espn.go.com/video/')
-	html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-02-16
+	html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
 	menu = common.parseDOM(html, "div", attrs = { "id": url })
 	channel = common.parseDOM(menu, "li", attrs = { "class": "channel" })
 	title = common.parseDOM(channel, "a")
@@ -134,7 +134,7 @@ def build_video_directory(url, name, type):
 		url = 'http://search.espn.go.com/results?searchString=' + newStr + '&start=' + str(int(page) * 16) + '&dims=6'
 		nexturl = url
 		html = getUrl(url).decode('ascii', 'ignore')
-		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
+		html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
 		results = common.parseDOM(html, "li", attrs = { "class": "result video-result" })
 		titledata = common.parseDOM(results, "h3")
 		title = common.parseDOM(titledata, "a", attrs = { "rel": "nofollow" })
@@ -153,7 +153,7 @@ def build_video_directory(url, name, type):
 	else:
 		nexturl = url
 		html = getUrl(url + "&pageNum=" + str(int(page)) + "&sortBy=&assetURL=http://assets.espn.go.com&module=LibraryPlaylist&pagename=vhub_index")
-		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
+		html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
 		videocell = common.parseDOM(html, "div", attrs = { "class": "video-cell" })
 		title = common.parseDOM(videocell, "h5")
 		thumb = common.parseDOM(videocell, "img", ret = "src")
