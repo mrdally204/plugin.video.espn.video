@@ -40,13 +40,13 @@ def build_main_directory():
 		infoLabels = { "Title": settings.getLocalizedString( 30006 ), "Plot": settings.getLocalizedString( 30006 ) }
 		addListItem(label = '[ ' + settings.getLocalizedString( 30006 ) + ' ]', image = history_thumb, url = u, isFolder = True, infoLabels = infoLabels)
 	build_video_directory('http://espn.go.com/video/format/libraryPlaylist?categoryid=2378529', 'The Latest', 'null')
-	setViewMode("503")
+	setViewMode("504")
 
 #@retry(IndexError)
 def build_sub_directory(url, thumb):
 	saveurl = url
 	html = getUrl('http://espn.go.com/video/')
-	html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
+	html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-02-16
 	menu = common.parseDOM(html, "div", attrs = { "id": url })
 	channel = common.parseDOM(menu, "li", attrs = { "class": "channel" })
 	title = common.parseDOM(channel, "a")
@@ -108,7 +108,7 @@ def build_sub_directory(url, thumb):
 		addListItem(label = name, image = thumb, url = u, isFolder = True, infoLabels = infoLabels)
 		item_count += 1	
 	xbmcplugin.addSortMethod( handle = int(sys.argv[1]), sortMethod = xbmcplugin.SORT_METHOD_NONE )
-	setViewMode("503")
+	setViewMode("504")
 	xbmcplugin.endOfDirectory( int( sys.argv[1] ) )
 
 #@retry(IndexError)
@@ -134,11 +134,11 @@ def build_video_directory(url, name, type):
 		url = 'http://search.espn.go.com/results?searchString=' + newStr + '&start=' + str(int(page) * 16) + '&dims=6'
 		nexturl = url
 		html = getUrl(url).decode('ascii', 'ignore')
-		html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
+		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
 		results = common.parseDOM(html, "li", attrs = { "class": "result video-result" })
 		titledata = common.parseDOM(results, "h3")
 		title = common.parseDOM(titledata, "a", attrs = { "rel": "nofollow" })
-		if len(title) == 0:
+		if len(title) == -1: #Swedemon fix 2015-09-10 changed from 0 to -1 to skip this step since sometimes page 1 has no videos but page 2 has videos
 			dialog = xbmcgui.Dialog()
 			ok = dialog.ok( plugin , settings.getLocalizedString( 30013 ) + '\n' + settings.getLocalizedString( 30014 ) )
 			remove_menu(newStr,'search')
@@ -153,7 +153,7 @@ def build_video_directory(url, name, type):
 	else:
 		nexturl = url
 		html = getUrl(url + "&pageNum=" + str(int(page)) + "&sortBy=&assetURL=http://assets.espn.go.com&module=LibraryPlaylist&pagename=vhub_index")
-		html = html.decode('UTF-8','ignore') #Swedemon/Mrdally204 Change 2015-08-31
+		html = html.decode(encoding='UTF-8',errors='ignore') #Swedemon fix 2015-03-27
 		videocell = common.parseDOM(html, "div", attrs = { "class": "video-cell" })
 		title = common.parseDOM(videocell, "h5")
 		thumb = common.parseDOM(videocell, "img", ret = "src")
@@ -187,9 +187,9 @@ def build_video_directory(url, name, type):
 	if pagecount and pagecount[0] != pagecount[1]:
 		u = { 'mode': '2', 'name': nextname, 'url': nexturl, 'page': str(int(page) + 1), 'type': 'null' }
 		infoLabels = { "Title": settings.getLocalizedString( 30003 ), "Plot": settings.getLocalizedString( 30003 ) }
-		addListItem(label = settings.getLocalizedString( 30003 ), image = next_thumb, url = u, isFolder = True, infoLabels = infoLabels)
+		addListItem(label = settings.getLocalizedString( 30003 ) + ' ' + str(int(pagecount[0])+1) + ' of ' + str(pagecount[1]), image = next_thumb, url = u, isFolder = True, infoLabels = infoLabels)
 	xbmcplugin.addSortMethod( handle = int(sys.argv[1]), sortMethod = xbmcplugin.SORT_METHOD_NONE )
-	setViewMode("503")
+	setViewMode("504")
 	xbmcplugin.endOfDirectory( int( sys.argv[1] ) )
 	
 def build_history_directory():
@@ -210,7 +210,7 @@ def build_history_directory():
 		u = sys.argv[0] + "?mode=2" + "&name=" + urllib.quote_plus( settings.getLocalizedString( 30005 ) ) + "&url=" + urllib.quote_plus( url ) + "&type=" + urllib.quote_plus( 'history' )
 		ok = xbmcplugin.addDirectoryItem( handle = int( sys.argv[1] ), url = u, listitem = listitem, isFolder = True )	
 	xbmcplugin.addSortMethod( handle = int(sys.argv[1]), sortMethod = xbmcplugin.SORT_METHOD_NONE )
-	setViewMode("503")
+	setViewMode("504")
 	xbmcplugin.endOfDirectory( int( sys.argv[1] ) )
 	
 def remove_menu(name, url):
